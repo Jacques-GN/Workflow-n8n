@@ -1,0 +1,776 @@
+{
+  "name": "LinkedIn AI Personal Branding - Tech IA Builders",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "triggerAtHour": 8,
+              "triggerAtMinute": 0
+            },
+            {
+              "field": "hours",
+              "triggerAtHour": 18,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "⏰ Schedule Trigger (8h & 18h)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [0, 300],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "current-date",
+              "name": "currentDate",
+              "type": "string",
+              "value": "={{ $now.format('yyyy-MM-dd') }}"
+            },
+            {
+              "id": "readable-date",
+              "name": "readableDate",
+              "type": "string",
+              "value": "={{ $now.format('dd MMMM yyyy') }}"
+            },
+            {
+              "id": "post-type",
+              "name": "postType",
+              "type": "string",
+              "value": "={{ $now.hour < 12 ? 'matin_news' : 'soir_deep_dive' }}"
+            },
+            {
+              "id": "post-type-label",
+              "name": "postTypeLabel",
+              "type": "string",
+              "value": "={{ $now.hour < 12 ? '🌅 News & Analyse' : '🌙 Deep Dive' }}"
+            },
+            {
+              "id": "filter-date",
+              "name": "filterDate",
+              "type": "string",
+              "value": "={{ $now.minus({hours: 72}).toISO() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-context",
+      "name": "📅 Set Context & Dates",
+      "type": "n8n-nodes-base.set",
+      "position": [220, 300],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "url": "https://www.actuia.com/feed/",
+        "options": {}
+      },
+      "id": "rss-actuia",
+      "name": "📰 RSS ActuIA (FR)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [500, 0],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "url": "https://www.lemondeinformatique.fr/flux-rss/thematique/intelligence-artificielle/rss.xml",
+        "options": {}
+      },
+      "id": "rss-lmi",
+      "name": "📰 RSS Le Monde Informatique (FR)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [500, 120],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed",
+        "options": {}
+      },
+      "id": "rss-mit",
+      "name": "📰 RSS MIT Tech Review (EN)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [500, 240],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "url": "https://www.artificialintelligence-news.com/feed/",
+        "options": {}
+      },
+      "id": "rss-ainews",
+      "name": "📰 RSS AI News (EN)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [500, 360],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "url": "https://www.kdnuggets.com/feed",
+        "options": {}
+      },
+      "id": "rss-kdnuggets",
+      "name": "📰 RSS KDnuggets (EN)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [500, 480],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "url": "https://openai.com/blog/rss.xml",
+        "options": {}
+      },
+      "id": "rss-openai",
+      "name": "📰 RSS OpenAI Blog (EN)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [500, 600],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "url": "https://www.anthropic.com/rss.xml",
+        "options": {}
+      },
+      "id": "rss-anthropic",
+      "name": "📰 RSS Anthropic (EN)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [500, 720],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "url": "https://huggingface.co/blog/feed.xml",
+        "options": {}
+      },
+      "id": "rss-huggingface",
+      "name": "📰 RSS Hugging Face (EN)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [500, 840],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.feedburner.com/venturebeat/SZYF",
+        "options": {}
+      },
+      "id": "rss-venturebeat",
+      "name": "📰 RSS VentureBeat AI (EN)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [500, 960],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "options": {}
+      },
+      "id": "rss-techcrunch",
+      "name": "📰 RSS TechCrunch AI (EN)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [500, 1080],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "numberInputs": 10
+      },
+      "id": "merge-sources",
+      "name": "🔀 Merge All Sources",
+      "type": "n8n-nodes-base.merge",
+      "position": [780, 480],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "date-filter-72h",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              },
+              "leftValue": "={{ $json.isoDate || $json.pubDate }}",
+              "rightValue": "={{ $('📅 Set Context & Dates').item.json.filterDate }}"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-72h",
+      "name": "🕐 Filter Articles (72h)",
+      "type": "n8n-nodes-base.filter",
+      "position": [1000, 480],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "isoDate",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "sort-date",
+      "name": "📊 Sort by Date (DESC)",
+      "type": "n8n-nodes-base.sort",
+      "position": [1200, 480],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "// =============================================================\n// 🎯 FILTER, SCORE & DEDUPE - Sélection pour audience IA technique\n// =============================================================\n// Filtre par pertinence LLM/IA, score, déduplique.\n// Fallback vers contenu éducatif si pas de news pertinente.\n// =============================================================\n\nconst articles = items.map(item => item.json);\nconst context = $('📅 Set Context & Dates').first().json;\n\n// === MOTS-CLÉS TECHNIQUES HIGH VALUE (+3 pts) ===\nconst highValueKeywords = [\n  // Entreprises & Modèles majeurs\n  'openai', 'gpt-4', 'gpt-5', 'gpt-4o', 'gpt-4-turbo', 'chatgpt', 'o1', 'o3', 'o1-preview',\n  'anthropic', 'claude', 'claude 3', 'claude 3.5', 'claude 4', 'sonnet', 'opus', 'haiku',\n  'google', 'gemini', 'gemini 2', 'gemini ultra', 'gemini pro', 'gemini flash', 'deepmind', 'bard',\n  'meta', 'llama', 'llama 3', 'llama 3.1', 'llama 4', 'code llama',\n  'xai', 'grok', 'grok 2', 'grok 3', 'elon musk',\n  'deepseek', 'deepseek v3', 'deepseek coder', 'deepseek-r1',\n  'mistral', 'mixtral', 'mistral large', 'mistral medium',\n  'microsoft', 'copilot', 'phi-3', 'phi-4', 'azure openai',\n  'perplexity', 'cohere', 'command r', 'command r+',\n  'nvidia', 'blackwell', 'h100', 'h200', 'gb200',\n  \n  // Concepts techniques LLM\n  'llm', 'large language model', 'transformer', 'attention',\n  'rag', 'retrieval augmented generation', 'retrieval-augmented',\n  'fine-tuning', 'fine tuning', 'finetuning', 'lora', 'qlora',\n  'prompt engineering', 'chain of thought', 'cot', 'reasoning',\n  'multimodal', 'vision language', 'vlm', 'text-to-image',\n  'embedding', 'vector database', 'vectorstore', 'pinecone', 'weaviate', 'chroma',\n  'agent', 'agentic', 'multi-agent', 'tool use', 'function calling',\n  'context window', 'token', 'tokenizer', '128k', '1m tokens',\n  'inference', 'latency', 'throughput', 'tps',\n  'benchmark', 'mmlu', 'humaneval', 'gsm8k', 'hellaswag',\n  'open source', 'open-source', 'open weights',\n  'quantization', 'gguf', 'ggml', 'int4', 'int8',\n  'moe', 'mixture of experts', 'sparse',\n  \n  // IA Générative\n  'sora', 'runway', 'pika', 'kling', 'video generation',\n  'stable diffusion', 'midjourney', 'dall-e', 'dalle', 'flux',\n  'diffusion model', 'text-to-video', 'image generation',\n  \n  // Architecture & Recherche\n  'attention mechanism', 'self-attention', 'kv cache',\n  'pretraining', 'post-training', 'rlhf', 'dpo', 'ppo',\n  'scaling law', 'emergent', 'capability', 'reasoning',\n  'alignment', 'safety', 'jailbreak', 'red team',\n  'arxiv', 'research paper'\n];\n\n// === MOTS-CLÉS MEDIUM VALUE (+1 pt) ===\nconst mediumValueKeywords = [\n  'intelligence artificielle', 'artificial intelligence',\n  'machine learning', 'ml', 'ai', 'ia',\n  'automation', 'automatisation',\n  'api', 'sdk', 'framework',\n  'hugging face', 'huggingface',\n  'langchain', 'llamaindex', 'semantic kernel', 'autogen',\n  'gpu', 'cuda', 'tensor', 'pytorch', 'tensorflow'\n];\n\n// === SCORER CHAQUE ARTICLE ===\nconst scoredArticles = articles.map(article => {\n  const title = (article.title || '').toLowerCase();\n  const description = (article.description || article.contentSnippet || article.content || '').toLowerCase();\n  const text = title + ' ' + description;\n  \n  let score = 0;\n  let matchedKeywords = [];\n  \n  // High value = +3 points\n  highValueKeywords.forEach(kw => {\n    if (text.includes(kw.toLowerCase())) {\n      score += 3;\n      if (!matchedKeywords.includes(kw)) matchedKeywords.push(kw);\n    }\n  });\n  \n  // Medium value = +1 point\n  mediumValueKeywords.forEach(kw => {\n    if (text.includes(kw.toLowerCase())) {\n      score += 1;\n      if (!matchedKeywords.includes(kw)) matchedKeywords.push(kw);\n    }\n  });\n  \n  // Bonus pour benchmarks/comparaisons\n  if (text.includes('vs') || text.includes('versus') || text.includes('compared') || text.includes('benchmark')) {\n    score += 2;\n  }\n  \n  // Bonus pour annonces majeures\n  if (text.includes('launch') || text.includes('release') || text.includes('announce') || \n      text.includes('introduces') || text.includes('unveils') ||\n      text.includes('lancé') || text.includes('sortie') || text.includes('annonce')) {\n    score += 3;\n  }\n  \n  // Bonus pour articles récents\n  const pubDate = new Date(article.isoDate || article.pubDate);\n  const hoursSincePublished = (Date.now() - pubDate.getTime()) / (1000 * 60 * 60);\n  if (hoursSincePublished < 12) score += 5;\n  else if (hoursSincePublished < 24) score += 4;\n  else if (hoursSincePublished < 48) score += 2;\n  else if (hoursSincePublished < 72) score += 1;\n  \n  // Détecter la langue\n  const isEnglish = !/[àâäéèêëïîôùûüçœæ]/i.test(article.title);\n  \n  // Extraire image si disponible\n  let imageUrl = null;\n  if (article.enclosure?.url) imageUrl = article.enclosure.url;\n  else if (article['media:content']?.$.url) imageUrl = article['media:content'].$.url;\n  else if (article['media:thumbnail']?.$.url) imageUrl = article['media:thumbnail'].$.url;\n  else if (article.image) imageUrl = article.image;\n  \n  return {\n    ...article,\n    relevanceScore: score,\n    matchedKeywords: [...new Set(matchedKeywords)].slice(0, 8),\n    hoursSincePublished: Math.round(hoursSincePublished),\n    isEnglish: isEnglish,\n    extractedImageUrl: imageUrl,\n    source: article.creator || article.author || article['dc:creator'] || 'Source IA'\n  };\n});\n\n// === DÉDUPLIQUER ===\nconst uniqueArticles = new Map();\nscoredArticles.forEach(article => {\n  const normalizedTitle = article.title\n    .toLowerCase()\n    .replace(/[^a-z0-9àâäéèêëïîôùûüç]/g, '')\n    .substring(0, 50);\n  \n  if (!uniqueArticles.has(normalizedTitle) || \n      uniqueArticles.get(normalizedTitle).relevanceScore < article.relevanceScore) {\n    uniqueArticles.set(normalizedTitle, article);\n  }\n});\n\n// === TRIER PAR SCORE ===\nconst sorted = Array.from(uniqueArticles.values())\n  .filter(a => a.relevanceScore >= 6) // Seuil minimum\n  .sort((a, b) => b.relevanceScore - a.relevanceScore);\n\n// === MODE ÉDUCATIF SI PAS DE NEWS ===\nif (sorted.length === 0) {\n  const educationalTopics = [\n    {\n      title: 'Comment fonctionne un Transformer : le mécanisme d\\'attention expliqué',\n      angle: 'architecture_transformer'\n    },\n    {\n      title: 'RAG vs Fine-tuning : quand utiliser quoi pour ton LLM ?',\n      angle: 'rag_vs_finetuning'\n    },\n    {\n      title: 'GPT-4 vs Claude 3.5 vs Gemini 2 : les vraies différences d\\'architecture',\n      angle: 'comparaison_llm'\n    },\n    {\n      title: 'Embeddings et Vector Databases : le guide complet pour builders',\n      angle: 'embeddings_vectordb'\n    },\n    {\n      title: 'Prompt Engineering avancé : Chain of Thought et ses variantes',\n      angle: 'prompt_engineering'\n    },\n    {\n      title: 'Mixture of Experts (MoE) : pourquoi Mixtral et GPT-4 l\\'utilisent',\n      angle: 'moe_architecture'\n    },\n    {\n      title: 'Quantization : faire tourner Llama 3 70B sur un laptop',\n      angle: 'quantization'\n    },\n    {\n      title: 'Agents IA : architectures et patterns pour builders',\n      angle: 'agents_ia'\n    },\n    {\n      title: 'RLHF vs DPO : comment aligner un LLM sur les préférences humaines',\n      angle: 'alignment_methods'\n    },\n    {\n      title: 'Context Window : pourquoi 128K tokens ne suffit pas toujours',\n      angle: 'context_window'\n    },\n    {\n      title: 'Function Calling : comment les LLMs utilisent des outils externes',\n      angle: 'function_calling'\n    },\n    {\n      title: 'Les tokenizers expliqués : BPE, SentencePiece et leurs impacts',\n      angle: 'tokenizers'\n    }\n  ];\n  \n  const selected = educationalTopics[Math.floor(Math.random() * educationalTopics.length)];\n  \n  return [{\n    json: {\n      mode: 'educational',\n      noNewsFound: true,\n      educationalTopic: selected.title,\n      educationalAngle: selected.angle,\n      postType: context.postType,\n      postTypeLabel: '📚 Deep Dive Éducatif',\n      currentDate: context.currentDate,\n      readableDate: context.readableDate,\n      hasImage: false,\n      imageUrl: null\n    }\n  }];\n}\n\n// === MODE NEWS : RETOURNER LE MEILLEUR ARTICLE ===\nconst selected = sorted[0];\n\nreturn [{\n  json: {\n    mode: 'news',\n    noNewsFound: false,\n    title: selected.title,\n    description: selected.description || selected.contentSnippet || '',\n    content: selected.content || selected['content:encoded'] || '',\n    link: selected.link,\n    pubDate: selected.pubDate || selected.isoDate,\n    source: selected.source,\n    relevanceScore: selected.relevanceScore,\n    matchedKeywords: selected.matchedKeywords,\n    isEnglish: selected.isEnglish,\n    hasImage: !!selected.extractedImageUrl,\n    imageUrl: selected.extractedImageUrl,\n    totalArticlesFound: sorted.length,\n    postType: context.postType,\n    postTypeLabel: context.postTypeLabel,\n    currentDate: context.currentDate,\n    readableDate: context.readableDate\n  }\n}];"
+      },
+      "id": "filter-score",
+      "name": "🎯 Filter, Score & Dedupe",
+      "type": "n8n-nodes-base.code",
+      "position": [1420, 480],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "mode-news",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.mode }}",
+              "rightValue": "news"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-mode",
+      "name": "🔀 Mode News ou Éducatif?",
+      "type": "n8n-nodes-base.if",
+      "position": [1640, 480],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// =============================================================\n// 📝 PREPARE NEWS DATA - Pour le mode actualité\n// =============================================================\n\nconst data = items[0].json;\n\nreturn [{\n  json: {\n    mode: 'news',\n    articleTitle: data.title,\n    articleDescription: data.description,\n    articleContent: data.content?.substring(0, 3000) || data.description,\n    articleLink: data.link,\n    articleSource: data.source,\n    matchedKeywords: data.matchedKeywords || [],\n    isEnglish: data.isEnglish,\n    hasImage: data.hasImage,\n    imageUrl: data.imageUrl,\n    postType: data.postType,\n    postTypeLabel: data.postTypeLabel,\n    currentDate: data.currentDate,\n    readableDate: data.readableDate,\n    relevanceScore: data.relevanceScore,\n    totalArticlesFound: data.totalArticlesFound\n  }\n}];"
+      },
+      "id": "prepare-news",
+      "name": "📝 Prepare News Data",
+      "type": "n8n-nodes-base.code",
+      "position": [1880, 380],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// =============================================================\n// 📝 PREPARE EDUCATIONAL DATA - Pour le mode éducatif\n// =============================================================\n\nconst data = items[0].json;\n\nreturn [{\n  json: {\n    mode: 'educational',\n    articleTitle: data.educationalTopic,\n    articleDescription: `Post éducatif technique sur : ${data.educationalTopic}`,\n    articleContent: '',\n    articleLink: null,\n    articleSource: 'Contenu éducatif original',\n    educationalAngle: data.educationalAngle,\n    matchedKeywords: [],\n    isEnglish: false,\n    hasImage: false,\n    imageUrl: null,\n    postType: data.postType,\n    postTypeLabel: '📚 Deep Dive Éducatif',\n    currentDate: data.currentDate,\n    readableDate: data.readableDate\n  }\n}];"
+      },
+      "id": "prepare-educational",
+      "name": "📝 Prepare Educational Data",
+      "type": "n8n-nodes-base.code",
+      "position": [1880, 580],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "output": "empty"
+      },
+      "id": "merge-modes",
+      "name": "🔗 Merge Modes",
+      "type": "n8n-nodes-base.merge",
+      "position": [2100, 480],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o",
+          "cachedResultName": "GPT-4o"
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "openai-model",
+      "name": "🧠 OpenAI GPT-4o",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [2220, 700],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "ratnejsGMlrFLswf",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"postContent\": {\n      \"type\": \"string\",\n      \"description\": \"Le post LinkedIn complet en français, style analyse stratégique, sans hashtags\"\n    },\n    \"hashtags\": {\n      \"type\": \"array\",\n      \"items\": { \"type\": \"string\" },\n      \"description\": \"5-7 hashtags techniques FR/EN\"\n    },\n    \"hookLine\": {\n      \"type\": \"string\",\n      \"description\": \"La première ligne du post - doit casser une croyance ou créer un contraste\"\n    },\n    \"strategicAngle\": {\n      \"type\": \"string\",\n      \"description\": \"L'angle technique/stratégique principal\"\n    }\n  },\n  \"required\": [\"postContent\", \"hashtags\", \"hookLine\", \"strategicAngle\"]\n}"
+      },
+      "id": "output-parser",
+      "name": "📋 Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [2380, 700],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Génère un post LinkedIn pour une audience technique IA (builders, développeurs, passionnés LLM) :\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📋 CONTEXTE\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n**MODE** : {{ $json.mode === 'news' ? '📰 NEWS - Analyse d\\'actualité IA' : '📚 ÉDUCATIF - Concept technique' }}\n**DATE** : {{ $json.readableDate }}\n\n{{ $json.mode === 'news' ? `\n**ACTUALITÉ À ANALYSER** :\n- Titre : ${$json.articleTitle}\n- Contenu : ${$json.articleDescription}\n- Source : ${$json.articleLink}\n- Langue : ${$json.isEnglish ? 'Anglais → Traduis en français' : 'Français'}\n- Mots-clés détectés : ${$json.matchedKeywords?.join(', ') || 'N/A'}\n` : `\n**SUJET ÉDUCATIF** : ${$json.articleTitle}\n**ANGLE** : ${$json.educationalAngle}\n\nCrée un post pédagogique qui explique ce concept de manière accessible mais techniquement précise pour des builders IA.\n` }}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🏢 ENTREPRISES & MODÈLES DE RÉFÉRENCE\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n- **OpenAI** : GPT-4o, GPT-4 Turbo, o1, o3, Sora, Codex\n- **Anthropic** : Claude 3.5 Sonnet, Claude 3 Opus\n- **Google** : Gemini 2.0 Flash/Pro/Ultra, Gemma\n- **Meta** : Llama 3.1, Code Llama\n- **xAI** : Grok 2, Grok 3\n- **DeepSeek** : DeepSeek V3, DeepSeek-R1\n- **Mistral** : Mistral Large, Mixtral 8x22B\n\nGénère maintenant le post selon le schéma JSON demandé.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Tu es un analyste stratégique tech/IA avec une expertise technique sur les LLMs, architectures transformer, RAG, fine-tuning, et l'écosystème des modèles (OpenAI, Anthropic, Google, Meta, xAI, DeepSeek, Mistral).\n\n🎯 **TON AUDIENCE** :\n- Développeurs qui construisent avec l'IA (LLMs, RAG, agents)\n- Passionnés tech qui veulent comprendre les architectures\n- Personnes qui apprennent à utiliser et comprendre l'IA\n- Ils suivent la course entre OpenAI, Google, Anthropic, Meta, xAI, DeepSeek\n\n✍️ **STYLE AYOUB FAOUZI (Disiz Yyov)** :\n\n**STRUCTURE NEWS** :\n1. **HOOK QUI CASSE UNE CROYANCE** (1-2 lignes)\n   - Annonce + contre-pied immédiat\n   - \"[Modèle] vient de sortir. Et non, [croyance fausse].\"\n   - \"Tout le monde parle de [X]. Personne ne parle de [Y].\"\n\n2. **TRANSITION CASH** (1 ligne)\n   - \"À un moment, il faut se dire la vérité :\"\n   - \"Mais creusons un peu.\"\n\n3. **EXPLICATION FACTUELLE** (2-3 lignes)\n   - Specs clés (context window, benchmarks, prix)\n   - Ce qui est nouveau techniquement\n   - Sobre, pas de hype\n\n4. **PIVOT STRATÉGIQUE** (1-2 lignes)\n   - \"Le vrai basculement n'est pas là.\"\n   - \"Le vrai signal est ailleurs.\"\n\n5. **ANALYSE MACRO/TECHNIQUE** (4-6 lignes)\n   - Pourquoi ce choix d'architecture ?\n   - Impact sur l'écosystème (API, open source, pricing)\n   - Comparaison avec la concurrence si pertinent\n   - Guerre des plateformes ou course à l'efficience\n\n6. **OBSERVATION/IRONIE** (optionnel, 1-2 lignes)\n   - \"Ce qui est d'ailleurs assez ironique...\"\n   - Contradictions ou jeux de pouvoir\n\n7. **CE QUE ÇA CHANGE POUR LES BUILDERS** (2-3 lignes)\n   - Si tu construis avec l'IA, voici ce qui change\n   - Nouveau use case débloqué ?\n\n8. **CONCLUSION DÉFINITIVE** (2 lignes)\n   - \"On ne parle plus de [X]. On parle de [Y].\"\n   - \"Et ce genre de mouvement, ce n'est jamais un hasard.\"\n\n9. **CTA** (2 lignes)\n   - \"♻️ Republie si cette analyse t'a éclairé\"\n   - \"💬 Tu utilises quel modèle pour [use case] ?\"\n\n**STRUCTURE ÉDUCATIF** :\n1. **HOOK PÉDAGOGIQUE** - \"Tu utilises [X] tous les jours. Mais sais-tu comment ça marche vraiment ?\"\n2. **ANALOGIE SIMPLE** - Le concept en une métaphore accessible\n3. **DEEP DIVE TECHNIQUE** - Comment ça fonctionne (5-7 lignes)\n4. **APPLICATIONS** - Où on retrouve ça dans ChatGPT, Claude, etc.\n5. **POUR ALLER PLUS LOIN** - Prochaine étape\n6. **CTA** - \"💬 C'est clair ? Des questions ?\"\n\n⚠️ **RÈGLES ABSOLUES** :\n- **JAMAIS** de listes à puces génériques style \"3 choses à savoir\"\n- **JAMAIS** de hype (\"révolutionnaire\", \"game-changer\")\n- **PAS** de structure \"problème → solution → action\"\n- Phrases COURTES (8-18 mots max)\n- BEAUCOUP d'espace blanc (retour ligne toutes 1-2 phrases)\n- Mentionner les NOMS PRÉCIS (GPT-4o, Claude 3.5 Sonnet, etc.)\n- Donner des CHIFFRES (context window, prix, latence)\n- PRENDRE POSITION (\"À mon avis...\", \"Ce qui me semble clair...\")\n- PAS d'émojis dans le corps (sauf CTA final)\n- PAS de hashtags dans le corps du texte\n- 180-300 mots maximum\n- Si source EN → tout traduire en FR"
+        }
+      },
+      "id": "ai-generator",
+      "name": "🤖 AI Content Generator",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [2320, 480],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "jsCode": "// =============================================================\n// 📝 PREPARE FINAL POST\n// =============================================================\n\nconst contentData = $('🤖 AI Content Generator').first().json.output;\nconst articleData = $('🔗 Merge Modes').first().json;\n\nconst postId = `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;\n\n// Hashtags\nconst hashtagString = contentData.hashtags\n  .map(h => h.startsWith('#') ? h : `#${h}`)\n  .join(' ');\n\nconst fullPostContent = `${contentData.postContent}\\n\\n${hashtagString}`;\n\nreturn [{\n  json: {\n    postId,\n    mode: articleData.mode,\n    \n    // Contenu\n    postContent: contentData.postContent,\n    fullPostContent,\n    hookLine: contentData.hookLine,\n    strategicAngle: contentData.strategicAngle,\n    \n    // Hashtags\n    hashtags: contentData.hashtags,\n    hashtagString,\n    \n    // Image (seulement pour news avec image source)\n    hasImage: articleData.hasImage && articleData.mode === 'news',\n    imageUrl: articleData.imageUrl || null,\n    \n    // Métadonnées\n    postType: articleData.postType,\n    postTypeLabel: articleData.postTypeLabel,\n    currentDate: articleData.currentDate,\n    readableDate: articleData.readableDate,\n    \n    // Article source\n    articleTitle: articleData.articleTitle,\n    articleLink: articleData.articleLink || null,\n    articleSource: articleData.articleSource,\n    \n    // Statut\n    status: 'pending_review',\n    createdAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "prepare-final",
+      "name": "📝 Prepare Final Post",
+      "type": "n8n-nodes-base.code",
+      "position": [2580, 480],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1cwTqfHTXihCfHf9uC9v1t5rngbYDCtGeacRLVB5VYKM",
+          "mode": "list",
+          "cachedResultName": "Poste LinkedIn IA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cwTqfHTXihCfHf9uC9v1t5rngbYDCtGeacRLVB5VYKM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "ACCEPTER",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cwTqfHTXihCfHf9uC9v1t5rngbYDCtGeacRLVB5VYKM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": ["postId"]
+        },
+        "options": {}
+      },
+      "id": "save-sheets",
+      "name": "📊 Save to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [2800, 480],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "daYc0T5iRVntoUhq",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Génère un email HTML pour la validation du post LinkedIn.\n\nDonnées :\n- Mode : {{ $json.mode }}\n- Type : {{ $json.postTypeLabel }}\n- Date : {{ $json.readableDate }}\n- Hook : {{ $json.hookLine }}\n- Contenu : {{ $json.postContent }}\n- Hashtags : {{ $json.hashtagString }}\n- Image : {{ $json.hasImage ? $json.imageUrl : 'Pas d\\'image' }}\n- Source : {{ $json.articleLink || 'Contenu éducatif' }}",
+        "options": {
+          "systemMessage": "Génère un email HTML professionnel pour valider un post LinkedIn.\n\nInclure :\n- Aperçu clair du post\n- Image si disponible\n- Hashtags\n- Lien source si disponible\n- Indication du mode (News ou Éducatif)\n\nStyle : fond clair, cartes avec ombres, moderne.\n\nRetourne UNIQUEMENT le HTML (pas de JSON, pas de markdown)."
+        }
+      },
+      "id": "format-email",
+      "name": "📧 Format Approval Email",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [3020, 480],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "GPT-4o-mini"
+        },
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "openai-email",
+      "name": "🧠 OpenAI GPT-4o-mini (Email)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [3020, 700],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "ratnejsGMlrFLswf",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "jeangnoumou55@gmail.com",
+        "subject": "=🔥 Post LinkedIn à valider - {{ $('📝 Prepare Final Post').item.json.postTypeLabel }} | {{ $('📝 Prepare Final Post').item.json.readableDate }}",
+        "message": "={{ $('📧 Format Approval Email').item.json.output }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "✅ Approuver & Publier",
+            "disapproveLabel": "❌ Rejeter"
+          }
+        },
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 45,
+              "resumeUnit": "minutes"
+            }
+          },
+          "appendAttribution": false
+        }
+      },
+      "id": "gmail-approval",
+      "name": "📧 Gmail - Send & Wait",
+      "type": "n8n-nodes-base.gmail",
+      "position": [3260, 480],
+      "webhookId": "linkedin-post-approval",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "nexQ6KKIdMENVDUz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "approval-check",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "is-approved",
+      "name": "✅ Is Approved?",
+      "type": "n8n-nodes-base.if",
+      "position": [3480, 480],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "post-content",
+              "name": "postContent",
+              "type": "string",
+              "value": "={{ $('📝 Prepare Final Post').item.json.fullPostContent }}"
+            },
+            {
+              "id": "image-url",
+              "name": "imageUrl",
+              "type": "string",
+              "value": "={{ $('📝 Prepare Final Post').item.json.imageUrl }}"
+            },
+            {
+              "id": "has-image",
+              "name": "hasImage",
+              "type": "boolean",
+              "value": "={{ $('📝 Prepare Final Post').item.json.hasImage }}"
+            },
+            {
+              "id": "post-id",
+              "name": "postId",
+              "type": "string",
+              "value": "={{ $('📝 Prepare Final Post').item.json.postId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-post-data",
+      "name": "📋 Get Post Data",
+      "type": "n8n-nodes-base.set",
+      "position": [3700, 380],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "has-image-check",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.hasImage }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "has-image",
+      "name": "🔀 Has Image?",
+      "type": "n8n-nodes-base.if",
+      "position": [3920, 380],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.imageUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "download-image",
+      "name": "📥 Download Article Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [4140, 280],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "person": "IQelTZbFrN",
+        "text": "={{ $('📋 Get Post Data').item.json.postContent }}",
+        "shareMediaCategory": "IMAGE",
+        "binaryPropertyName": "data",
+        "additionalFields": {}
+      },
+      "id": "linkedin-with-image",
+      "name": "📤 LinkedIn (avec Image)",
+      "type": "n8n-nodes-base.linkedIn",
+      "position": [4360, 280],
+      "typeVersion": 1,
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "ybQG4TtXQKNGFcvv",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "person": "IQelTZbFrN",
+        "text": "={{ $json.postContent }}",
+        "shareMediaCategory": "NONE",
+        "additionalFields": {}
+      },
+      "id": "linkedin-text-only",
+      "name": "📤 LinkedIn (Texte seul)",
+      "type": "n8n-nodes-base.linkedIn",
+      "position": [4140, 480],
+      "typeVersion": 1,
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "ybQG4TtXQKNGFcvv",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "output": "empty"
+      },
+      "id": "merge-linkedin",
+      "name": "🔗 Merge LinkedIn",
+      "type": "n8n-nodes-base.merge",
+      "position": [4580, 380],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "sendTo": "jeangnoumou55@gmail.com",
+        "subject": "=✅ Post LinkedIn publié ! - {{ $('📝 Prepare Final Post').item.json.readableDate }}",
+        "message": "=Votre post LinkedIn a été publié avec succès !\n\n🔗 Contenu publié :\n{{ $('📋 Get Post Data').item.json.postContent }}\n\n📊 ID : {{ $json.urn || 'Publié' }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "success-notif",
+      "name": "🎉 Success Notification",
+      "type": "n8n-nodes-base.gmail",
+      "position": [4800, 380],
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "nexQ6KKIdMENVDUz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1cwTqfHTXihCfHf9uC9v1t5rngbYDCtGeacRLVB5VYKM"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultName": "ACCEPTER"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "rejected"
+          },
+          "matchingColumns": ["postId"]
+        },
+        "options": {}
+      },
+      "id": "handle-rejection",
+      "name": "❌ Handle Rejection",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [3700, 580],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "daYc0T5iRVntoUhq",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "⏰ Schedule Trigger (8h & 18h)": {
+      "main": [[{ "node": "📅 Set Context & Dates", "type": "main", "index": 0 }]]
+    },
+    "📅 Set Context & Dates": {
+      "main": [[
+        { "node": "📰 RSS ActuIA (FR)", "type": "main", "index": 0 },
+        { "node": "📰 RSS Le Monde Informatique (FR)", "type": "main", "index": 0 },
+        { "node": "📰 RSS MIT Tech Review (EN)", "type": "main", "index": 0 },
+        { "node": "📰 RSS AI News (EN)", "type": "main", "index": 0 },
+        { "node": "📰 RSS KDnuggets (EN)", "type": "main", "index": 0 },
+        { "node": "📰 RSS OpenAI Blog (EN)", "type": "main", "index": 0 },
+        { "node": "📰 RSS Anthropic (EN)", "type": "main", "index": 0 },
+        { "node": "📰 RSS Hugging Face (EN)", "type": "main", "index": 0 },
+        { "node": "📰 RSS VentureBeat AI (EN)", "type": "main", "index": 0 },
+        { "node": "📰 RSS TechCrunch AI (EN)", "type": "main", "index": 0 }
+      ]]
+    },
+    "📰 RSS ActuIA (FR)": { "main": [[{ "node": "🔀 Merge All Sources", "type": "main", "index": 0 }]] },
+    "📰 RSS Le Monde Informatique (FR)": { "main": [[{ "node": "🔀 Merge All Sources", "type": "main", "index": 1 }]] },
+    "📰 RSS MIT Tech Review (EN)": { "main": [[{ "node": "🔀 Merge All Sources", "type": "main", "index": 2 }]] },
+    "📰 RSS AI News (EN)": { "main": [[{ "node": "🔀 Merge All Sources", "type": "main", "index": 3 }]] },
+    "📰 RSS KDnuggets (EN)": { "main": [[{ "node": "🔀 Merge All Sources", "type": "main", "index": 4 }]] },
+    "📰 RSS OpenAI Blog (EN)": { "main": [[{ "node": "🔀 Merge All Sources", "type": "main", "index": 5 }]] },
+    "📰 RSS Anthropic (EN)": { "main": [[{ "node": "🔀 Merge All Sources", "type": "main", "index": 6 }]] },
+    "📰 RSS Hugging Face (EN)": { "main": [[{ "node": "🔀 Merge All Sources", "type": "main", "index": 7 }]] },
+    "📰 RSS VentureBeat AI (EN)": { "main": [[{ "node": "🔀 Merge All Sources", "type": "main", "index": 8 }]] },
+    "📰 RSS TechCrunch AI (EN)": { "main": [[{ "node": "🔀 Merge All Sources", "type": "main", "index": 9 }]] },
+    "🔀 Merge All Sources": { "main": [[{ "node": "🕐 Filter Articles (72h)", "type": "main", "index": 0 }]] },
+    "🕐 Filter Articles (72h)": { "main": [[{ "node": "📊 Sort by Date (DESC)", "type": "main", "index": 0 }]] },
+    "📊 Sort by Date (DESC)": { "main": [[{ "node": "🎯 Filter, Score & Dedupe", "type": "main", "index": 0 }]] },
+    "🎯 Filter, Score & Dedupe": { "main": [[{ "node": "🔀 Mode News ou Éducatif?", "type": "main", "index": 0 }]] },
+    "🔀 Mode News ou Éducatif?": {
+      "main": [
+        [{ "node": "📝 Prepare News Data", "type": "main", "index": 0 }],
+        [{ "node": "📝 Prepare Educational Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "📝 Prepare News Data": { "main": [[{ "node": "🔗 Merge Modes", "type": "main", "index": 0 }]] },
+    "📝 Prepare Educational Data": { "main": [[{ "node": "🔗 Merge Modes", "type": "main", "index": 1 }]] },
+    "🔗 Merge Modes": { "main": [[{ "node": "🤖 AI Content Generator", "type": "main", "index": 0 }]] },
+    "🧠 OpenAI GPT-4o": { "ai_languageModel": [[{ "node": "🤖 AI Content Generator", "type": "ai_languageModel", "index": 0 }]] },
+    "📋 Structured Output Parser": { "ai_outputParser": [[{ "node": "🤖 AI Content Generator", "type": "ai_outputParser", "index": 0 }]] },
+    "🤖 AI Content Generator": { "main": [[{ "node": "📝 Prepare Final Post", "type": "main", "index": 0 }]] },
+    "📝 Prepare Final Post": { "main": [[{ "node": "📊 Save to Google Sheets", "type": "main", "index": 0 }]] },
+    "📊 Save to Google Sheets": { "main": [[{ "node": "📧 Format Approval Email", "type": "main", "index": 0 }]] },
+    "🧠 OpenAI GPT-4o-mini (Email)": { "ai_languageModel": [[{ "node": "📧 Format Approval Email", "type": "ai_languageModel", "index": 0 }]] },
+    "📧 Format Approval Email": { "main": [[{ "node": "📧 Gmail - Send & Wait", "type": "main", "index": 0 }]] },
+    "📧 Gmail - Send & Wait": { "main": [[{ "node": "✅ Is Approved?", "type": "main", "index": 0 }]] },
+    "✅ Is Approved?": {
+      "main": [
+        [{ "node": "📋 Get Post Data", "type": "main", "index": 0 }],
+        [{ "node": "❌ Handle Rejection", "type": "main", "index": 0 }]
+      ]
+    },
+    "📋 Get Post Data": { "main": [[{ "node": "🔀 Has Image?", "type": "main", "index": 0 }]] },
+    "🔀 Has Image?": {
+      "main": [
+        [{ "node": "📥 Download Article Image", "type": "main", "index": 0 }],
+        [{ "node": "📤 LinkedIn (Texte seul)", "type": "main", "index": 0 }]
+      ]
+    },
+    "📥 Download Article Image": { "main": [[{ "node": "📤 LinkedIn (avec Image)", "type": "main", "index": 0 }]] },
+    "📤 LinkedIn (avec Image)": { "main": [[{ "node": "🔗 Merge LinkedIn", "type": "main", "index": 0 }]] },
+    "📤 LinkedIn (Texte seul)": { "main": [[{ "node": "🔗 Merge LinkedIn", "type": "main", "index": 1 }]] },
+    "🔗 Merge LinkedIn": { "main": [[{ "node": "🎉 Success Notification", "type": "main", "index": 0 }]] }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
