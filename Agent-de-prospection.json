@@ -1,0 +1,529 @@
+{
+  "name": "🎯 Agent Prospection Multi-LLM (Claude + GPT-4 + Llama)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🎯 Agent Prospection Multi-LLM\n\n### 🤖 3 LLMs Orchestrés\n\n🔵 **CLAUDE** (Anthropic)\n→ Qualification & Analyse du profil\n\n🟢 **GPT-4** (OpenAI)\n→ Génération message personnalisé\n\n🟠 **LLAMA** (Ollama Local)\n→ Formatage données & Enrichissement\n\n---\n\n### ⚙️ Configuration requise\n1. **Google Sheets** : Liste de prospects\n2. **Anthropic API** : Pour Claude\n3. **OpenAI API** : Pour GPT-4\n4. **Ollama** : Llama 3 en local\n5. **Supabase** : Stockage résultats",
+        "width": 320,
+        "height": 420,
+        "color": 4
+      },
+      "id": "sticky-doc",
+      "name": "📚 Documentation",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [80, 40],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "trigger-manual",
+      "name": "▶️ Démarrage",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [200, 520],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultName": "Prospects"
+        },
+        "options": {}
+      },
+      "id": "get-prospects",
+      "name": "📥 Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [420, 520],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 📊 Étape 1\n### Source de Données\n\n📥 **Google Sheets**\nListe des prospects à qualifier\n\nColonnes :\n- name\n- position\n- company\n- linkedin_url",
+        "width": 220,
+        "height": 200,
+        "color": 7
+      },
+      "id": "sticky-step1",
+      "name": "📝 Step 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [380, 300],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "loop-prospects",
+      "name": "🔄 Loop",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [640, 520],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyse ce profil de prospect et qualifie-le pour une offre de services IA/Automatisation :\n\n**PROFIL** :\n- Nom : {{ $json.name }}\n- Poste : {{ $json.position }}\n- Entreprise : {{ $json.company }}\n- LinkedIn : {{ $json.linkedin_url }}\n\n**TA MISSION** :\n1. Évalue la pertinence de ce prospect (score de 1 à 10)\n2. Identifie les signaux d'intérêt potentiels\n3. Suggère un angle d'approche personnalisé\n4. Détermine la priorité (haute/moyenne/basse)\n\nRetourne un JSON structuré.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Tu es un expert en qualification de prospects B2B pour des services d'IA et d'automatisation.\n\nCritères de scoring :\n- Poste décisionnel (CEO, CTO, Directeur, Manager) : +3 points\n- Entreprise tech ou digitale : +2 points\n- Poste lié à l'innovation, digital, data : +2 points\n- PME/ETI (plus agile) : +1 point\n- Startup : +1 point\n- Grande entreprise avec budget : +1 point\n\nScore final sur 10. Retourne toujours un JSON valide."
+        }
+      },
+      "id": "claude-qualify",
+      "name": "🔵 CLAUDE: Qualifier",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [880, 520],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-20250514",
+          "cachedResultName": "Claude Sonnet 4"
+        },
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "claude-model",
+      "name": "🔵 Claude Sonnet",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "position": [880, 740],
+      "typeVersion": 1.3,
+      "credentials": {
+        "anthropicApi": {
+          "id": "YOUR_ANTHROPIC_CREDENTIAL",
+          "name": "Anthropic API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"score\": {\n      \"type\": \"number\",\n      \"description\": \"Score de qualification de 1 à 10\"\n    },\n    \"analysis\": {\n      \"type\": \"string\",\n      \"description\": \"Analyse détaillée du profil\"\n    },\n    \"signals\": {\n      \"type\": \"array\",\n      \"items\": { \"type\": \"string\" },\n      \"description\": \"Signaux d'intérêt identifiés\"\n    },\n    \"approachAngle\": {\n      \"type\": \"string\",\n      \"description\": \"Angle d'approche suggéré\"\n    },\n    \"priority\": {\n      \"type\": \"string\",\n      \"enum\": [\"haute\", \"moyenne\", \"basse\"],\n      \"description\": \"Priorité de contact\"\n    }\n  },\n  \"required\": [\"score\", \"analysis\", \"approachAngle\", \"priority\"]\n}"
+      },
+      "id": "claude-parser",
+      "name": "📋 Parser Claude",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [1040, 740],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "content": "## 🔵 Étape 2\n### Qualification IA\n\n🔵 **CLAUDE** (Anthropic)\n\nAnalyse le profil et attribue :\n- Score 1-10\n- Signaux d'intérêt\n- Angle d'approche\n- Priorité",
+        "width": 220,
+        "height": 200,
+        "color": 5
+      },
+      "id": "sticky-step2",
+      "name": "📝 Step 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [840, 300],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fusionner données prospect + qualification\nconst prospectData = $('🔄 Loop').first().json;\nconst qualificationData = $('🔵 CLAUDE: Qualifier').first().json.output;\n\nreturn [{\n  json: {\n    name: prospectData.name,\n    position: prospectData.position,\n    company: prospectData.company,\n    linkedin_url: prospectData.linkedin_url,\n    score: qualificationData.score,\n    analysis: qualificationData.analysis,\n    signals: qualificationData.signals || [],\n    approachAngle: qualificationData.approachAngle,\n    priority: qualificationData.priority,\n    qualifiedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "merge-data",
+      "name": "🔗 Merge Data",
+      "type": "n8n-nodes-base.code",
+      "position": [1120, 520],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "score-check",
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              },
+              "leftValue": "={{ $json.score }}",
+              "rightValue": 7
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "if-score",
+      "name": "🎯 Score ≥ 7 ?",
+      "type": "n8n-nodes-base.if",
+      "position": [1340, 520],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "content": "## 🎯 Étape 3\n### Filtrage Score\n\n✅ Score ≥ 7 → GPT-4\n❌ Score < 7 → Log ignoré",
+        "width": 200,
+        "height": 140,
+        "color": 3
+      },
+      "id": "sticky-step3",
+      "name": "📝 Step 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [1300, 340],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Écris un message de connexion LinkedIn ultra-personnalisé :\n\n**PROFIL** :\n- Nom : {{ $json.name }}\n- Poste : {{ $json.position }}\n- Entreprise : {{ $json.company }}\n\n**ANALYSE CLAUDE** :\n{{ $json.analysis }}\n\n**ANGLE D'APPROCHE** :\n{{ $json.approachAngle }}\n\n**SIGNAUX** :\n{{ $json.signals.join(', ') }}\n\nContraintes :\n- Max 280 caractères\n- Pas de \"Je\" en premier mot\n- Mentionner un élément spécifique\n- Ton pro mais humain\n- Pas de pitch direct\n- Finir par question ou valeur\n\nRetourne UNIQUEMENT le message.",
+        "options": {
+          "systemMessage": "Tu es un expert en copywriting B2B et outreach LinkedIn.\n\nTu écris des messages qui :\n- Captent l'attention\n- Montrent la recherche faite\n- Créent une connexion humaine\n- Ne ressemblent pas à du spam\n- Incitent à accepter\n\nRetourne UNIQUEMENT le message, sans guillemets."
+        }
+      },
+      "id": "gpt4-message",
+      "name": "🟢 GPT-4: Message",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [1580, 420],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o",
+          "cachedResultName": "GPT-4o"
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "gpt4-model",
+      "name": "🟢 GPT-4o Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [1580, 640],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🟢 Étape 4\n### Message Personnalisé\n\n🟢 **GPT-4** (OpenAI)\n\nGénère un message LinkedIn\nultra-personnalisé.\n\nMax 280 caractères.",
+        "width": 220,
+        "height": 180,
+        "color": 6
+      },
+      "id": "sticky-step4",
+      "name": "📝 Step 4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [1540, 220],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "// Préparer données pour Llama\nconst prospectData = $('🔗 Merge Data').first().json;\nconst message = $('🟢 GPT-4: Message').first().json.output;\n\nreturn [{\n  json: {\n    ...prospectData,\n    personalized_message: message,\n    status: 'ready_for_enrichment'\n  }\n}];"
+      },
+      "id": "prepare-llama",
+      "name": "📦 Préparer Llama",
+      "type": "n8n-nodes-base.code",
+      "position": [1820, 420],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Enrichis et formate ces données prospect pour stockage :\n\n**DONNÉES BRUTES** :\n{{ JSON.stringify($json, null, 2) }}\n\n**TA MISSION** :\n1. Nettoie et normalise les données\n2. Génère des tags pertinents pour la segmentation\n3. Suggère une séquence de follow-up (timing)\n4. Identifie le meilleur canal de contact\n5. Estime la probabilité de conversion (0-100%)\n\nRetourne un JSON enrichi.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Tu es un assistant de traitement de données spécialisé en prospection B2B.\n\nTu enrichis les données prospects avec :\n- Tags de segmentation pertinents\n- Recommandations de timing\n- Score de conversion estimé\n- Canal de contact optimal\n\nRetourne toujours un JSON valide et structuré."
+        }
+      },
+      "id": "llama-enrich",
+      "name": "🟠 LLAMA: Enrichir",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [2060, 420],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "model": "llama3:8b",
+        "baseUrl": "http://localhost:11434",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "llama-model",
+      "name": "🟠 Llama 3 (Ollama)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "position": [2060, 640],
+      "typeVersion": 1,
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"cleanedData\": {\n      \"type\": \"object\",\n      \"description\": \"Données nettoyées du prospect\"\n    },\n    \"tags\": {\n      \"type\": \"array\",\n      \"items\": { \"type\": \"string\" },\n      \"description\": \"Tags de segmentation\"\n    },\n    \"followUpSequence\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"day1\": { \"type\": \"string\" },\n        \"day3\": { \"type\": \"string\" },\n        \"day7\": { \"type\": \"string\" }\n      },\n      \"description\": \"Séquence de follow-up suggérée\"\n    },\n    \"bestChannel\": {\n      \"type\": \"string\",\n      \"enum\": [\"linkedin\", \"email\", \"phone\", \"twitter\"],\n      \"description\": \"Meilleur canal de contact\"\n    },\n    \"conversionProbability\": {\n      \"type\": \"number\",\n      \"description\": \"Probabilité de conversion 0-100\"\n    }\n  },\n  \"required\": [\"cleanedData\", \"tags\", \"bestChannel\", \"conversionProbability\"]\n}"
+      },
+      "id": "llama-parser",
+      "name": "📋 Parser Llama",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [2220, 640],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "content": "## 🟠 Étape 5\n### Enrichissement Local\n\n🟠 **LLAMA 3** (Ollama)\n\nTraitement local :\n- Nettoyage données\n- Tags segmentation\n- Séquence follow-up\n- Score conversion\n\n💡 Gratuit & Privé !",
+        "width": 220,
+        "height": 220,
+        "color": 2
+      },
+      "id": "sticky-step5",
+      "name": "📝 Step 5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [2020, 180],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "// Préparer données finales pour Supabase\nconst mergedData = $('🔗 Merge Data').first().json;\nconst message = $('🟢 GPT-4: Message').first().json.output;\nconst enriched = $('🟠 LLAMA: Enrichir').first().json.output;\n\nreturn [{\n  json: {\n    // Données de base\n    name: mergedData.name,\n    position: mergedData.position,\n    company: mergedData.company,\n    linkedin_url: mergedData.linkedin_url,\n    \n    // Qualification Claude\n    score: mergedData.score,\n    priority: mergedData.priority,\n    analysis: mergedData.analysis,\n    approach_angle: mergedData.approachAngle,\n    signals: mergedData.signals,\n    \n    // Message GPT-4\n    personalized_message: message,\n    \n    // Enrichissement Llama\n    tags: enriched.tags || [],\n    best_channel: enriched.bestChannel || 'linkedin',\n    conversion_probability: enriched.conversionProbability || 0,\n    follow_up_sequence: enriched.followUpSequence || {},\n    \n    // Métadonnées\n    status: 'ready_to_send',\n    qualified_at: mergedData.qualifiedAt,\n    created_at: new Date().toISOString(),\n    \n    // LLMs utilisés\n    llms_used: ['claude-sonnet-4', 'gpt-4o', 'llama3-8b']\n  }\n}];"
+      },
+      "id": "prepare-final",
+      "name": "📦 Données Finales",
+      "type": "n8n-nodes-base.code",
+      "position": [2300, 420],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "tableId": "prospects",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldName": "name", "fieldValue": "={{ $json.name }}" },
+            { "fieldName": "position", "fieldValue": "={{ $json.position }}" },
+            { "fieldName": "company", "fieldValue": "={{ $json.company }}" },
+            { "fieldName": "linkedin_url", "fieldValue": "={{ $json.linkedin_url }}" },
+            { "fieldName": "score", "fieldValue": "={{ $json.score }}" },
+            { "fieldName": "priority", "fieldValue": "={{ $json.priority }}" },
+            { "fieldName": "analysis", "fieldValue": "={{ $json.analysis }}" },
+            { "fieldName": "approach_angle", "fieldValue": "={{ $json.approach_angle }}" },
+            { "fieldName": "signals", "fieldValue": "={{ JSON.stringify($json.signals) }}" },
+            { "fieldName": "personalized_message", "fieldValue": "={{ $json.personalized_message }}" },
+            { "fieldName": "tags", "fieldValue": "={{ JSON.stringify($json.tags) }}" },
+            { "fieldName": "best_channel", "fieldValue": "={{ $json.best_channel }}" },
+            { "fieldName": "conversion_probability", "fieldValue": "={{ $json.conversion_probability }}" },
+            { "fieldName": "follow_up_sequence", "fieldValue": "={{ JSON.stringify($json.follow_up_sequence) }}" },
+            { "fieldName": "status", "fieldValue": "={{ $json.status }}" },
+            { "fieldName": "llms_used", "fieldValue": "={{ JSON.stringify($json.llms_used) }}" },
+            { "fieldName": "qualified_at", "fieldValue": "={{ $json.qualified_at }}" },
+            { "fieldName": "created_at", "fieldValue": "={{ $json.created_at }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "supabase-insert",
+      "name": "💾 Supabase: Save",
+      "type": "n8n-nodes-base.supabase",
+      "position": [2540, 420],
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "YOUR_SUPABASE_CREDENTIAL",
+          "name": "Supabase API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 💾 Étape 6\n### Stockage\n\n💾 **Supabase**\n\nEnregistre toutes les données :\n- Qualification\n- Message\n- Enrichissement\n- Métadonnées",
+        "width": 200,
+        "height": 180,
+        "color": 1
+      },
+      "id": "sticky-step6",
+      "name": "📝 Step 6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [2500, 220],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "result",
+              "name": "result",
+              "type": "string",
+              "value": "=✅ {{ $json.name }} qualifié (score: {{ $json.score }}, conversion: {{ $json.conversion_probability }}%)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "success",
+      "name": "✅ Succès",
+      "type": "n8n-nodes-base.set",
+      "position": [2780, 420],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log prospect ignoré\nconst data = items[0].json;\n\nreturn [{\n  json: {\n    result: `⏭️ ${data.name} ignoré (score: ${data.score})`,\n    name: data.name,\n    company: data.company,\n    score: data.score,\n    reason: 'Score < 7',\n    skippedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "low-score",
+      "name": "⏭️ Score < 7",
+      "type": "n8n-nodes-base.code",
+      "position": [1580, 620],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "tableId": "prospects_skipped",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldName": "name", "fieldValue": "={{ $json.name }}" },
+            { "fieldName": "company", "fieldValue": "={{ $json.company }}" },
+            { "fieldName": "score", "fieldValue": "={{ $json.score }}" },
+            { "fieldName": "reason", "fieldValue": "={{ $json.reason }}" },
+            { "fieldName": "skipped_at", "fieldValue": "={{ $json.skippedAt }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "supabase-skipped",
+      "name": "💾 Log Ignorés",
+      "type": "n8n-nodes-base.supabase",
+      "position": [1820, 620],
+      "typeVersion": 1,
+      "credentials": {
+        "supabaseApi": {
+          "id": "YOUR_SUPABASE_CREDENTIAL",
+          "name": "Supabase API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "output": "empty"
+      },
+      "id": "merge-results",
+      "name": "🔗 Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [2780, 540],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {},
+      "id": "loop-back",
+      "name": "🔁 Next",
+      "type": "n8n-nodes-base.noOp",
+      "position": [3000, 520],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "▶️ Démarrage": {
+      "main": [[{ "node": "📥 Google Sheets", "type": "main", "index": 0 }]]
+    },
+    "📥 Google Sheets": {
+      "main": [[{ "node": "🔄 Loop", "type": "main", "index": 0 }]]
+    },
+    "🔄 Loop": {
+      "main": [
+        [{ "node": "🔵 CLAUDE: Qualifier", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "🔵 CLAUDE: Qualifier": {
+      "main": [[{ "node": "🔗 Merge Data", "type": "main", "index": 0 }]]
+    },
+    "🔵 Claude Sonnet": {
+      "ai_languageModel": [[{ "node": "🔵 CLAUDE: Qualifier", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "📋 Parser Claude": {
+      "ai_outputParser": [[{ "node": "🔵 CLAUDE: Qualifier", "type": "ai_outputParser", "index": 0 }]]
+    },
+    "🔗 Merge Data": {
+      "main": [[{ "node": "🎯 Score ≥ 7 ?", "type": "main", "index": 0 }]]
+    },
+    "🎯 Score ≥ 7 ?": {
+      "main": [
+        [{ "node": "🟢 GPT-4: Message", "type": "main", "index": 0 }],
+        [{ "node": "⏭️ Score < 7", "type": "main", "index": 0 }]
+      ]
+    },
+    "🟢 GPT-4: Message": {
+      "main": [[{ "node": "📦 Préparer Llama", "type": "main", "index": 0 }]]
+    },
+    "🟢 GPT-4o Model": {
+      "ai_languageModel": [[{ "node": "🟢 GPT-4: Message", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "📦 Préparer Llama": {
+      "main": [[{ "node": "🟠 LLAMA: Enrichir", "type": "main", "index": 0 }]]
+    },
+    "🟠 LLAMA: Enrichir": {
+      "main": [[{ "node": "📦 Données Finales", "type": "main", "index": 0 }]]
+    },
+    "🟠 Llama 3 (Ollama)": {
+      "ai_languageModel": [[{ "node": "🟠 LLAMA: Enrichir", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "📋 Parser Llama": {
+      "ai_outputParser": [[{ "node": "🟠 LLAMA: Enrichir", "type": "ai_outputParser", "index": 0 }]]
+    },
+    "📦 Données Finales": {
+      "main": [[{ "node": "💾 Supabase: Save", "type": "main", "index": 0 }]]
+    },
+    "💾 Supabase: Save": {
+      "main": [[{ "node": "✅ Succès", "type": "main", "index": 0 }]]
+    },
+    "✅ Succès": {
+      "main": [[{ "node": "🔗 Merge", "type": "main", "index": 0 }]]
+    },
+    "⏭️ Score < 7": {
+      "main": [[{ "node": "💾 Log Ignorés", "type": "main", "index": 0 }]]
+    },
+    "💾 Log Ignorés": {
+      "main": [[{ "node": "🔗 Merge", "type": "main", "index": 1 }]]
+    },
+    "🔗 Merge": {
+      "main": [[{ "node": "🔁 Next", "type": "main", "index": 0 }]]
+    },
+    "🔁 Next": {
+      "main": [[{ "node": "🔄 Loop", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "pinData": {},
+  "tags": [
+    { "name": "Prospection" },
+    { "name": "Multi-LLM" },
+    { "name": "Claude" },
+    { "name": "GPT-4" },
+    { "name": "Llama" }
+  ]
+}
